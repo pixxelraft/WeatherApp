@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeatherSense | Umair's App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+  --light-bg: #e0f7fa;
+  --dark-bg: #0d1b2a;
+  --text-light: #0d1b2a;
+  --text-dark: #e0e1e2;
+  --card-light-bg: rgba(255, 255, 255, 0.4);
+  --card-dark-bg: rgba(27, 38, 59, 0.4);
+  --accent: #ffb703;
+  --shadow: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] {
+  --bg: var(--light-bg);
+  --text: var(--text-light);
+  --card-bg: var(--card-light-bg);
+}
+
+[data-theme="dark"] {
+  --bg: var(--dark-bg);
+  --text: var(--text-dark);
+  --card-bg: var(--card-dark-bg);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  padding: 20px;
+  transition: background 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  background-image: linear-gradient(135deg, #81d4fa 0%, #0288d1 100%);
+}
+header {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 30px;
+    color: var(--text);
+    text-shadow: 1px 1px 2px var(--shadow);
+}
+
+[data-theme="dark"] body {
+    background-image: linear-gradient(135deg, #1e3a8a 0%, #1e1b4b 100%);
+}
+
+.container {
+  max-width: 700px;
+  margin: 20px auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 15px;
+}
+
+#searchForm {
+  width: 100%;
+}
+
+#cityInput {
+  padding: 12px 20px;
+  width: 100%;
+  border-radius: 30px;
+  border: 1px solid transparent;
+  font-size: 16px;
+  outline: none;
+  background: var(--card-bg);
+  color: var(--text);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 4px 6px var(--shadow);
+  transition: border-color 0.2s ease;
+}
+
+#cityInput:focus {
+    border-color: var(--accent);
+}
+
+.toggle {
+  background: var(--accent);
+  color: #0d1b2a;
+  border: none;
+  border-radius: 30px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 6px var(--shadow);
+  transition: transform 0.2s ease;
+}
+
+.toggle:hover {
+    transform: translateY(-2px);
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 25px;
+  margin-bottom: 25px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.weather-main {
+  text-align: center;
+}
+.current-temp {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 10px 0;
+}
+.current-temp img {
+  width: 120px;
+  margin-right: -15px;
+}
+.current-temp h1 {
+  font-size: 5rem;
+  font-weight: 700;
+}
+#description {
+    text-transform: capitalize;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.metrics {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+.metric {
+  font-size: 0.9rem;
+}
+
+.forecast {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  gap: 15px;
+}
+.forecast-day {
+  background: var(--card-bg);
+  border-radius: 15px;
+  text-align: center;
+  padding: 15px 10px;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+.forecast-day img {
+  width: 60px;
+}
+.forecast-day h4 {
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+/* Loader Animation */
+.loader {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--text);
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: block;
+  margin: 50px auto;
+  animation: rotation 1s linear infinite;
+}
+
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error Message */
+.error {
+    text-align: center;
+    background-color: rgba(255, 0, 0, 0.2);
+    color: var(--text-dark);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+    </style>
+   
+</head>
+<body>
+    <header>Pixxelraft Weather APP<br>Made by- Umair</header>
+    <div class="container" data-theme="light">
+        <div class="header">
+            <form id="searchForm">
+                <input type="text" id="cityInput" placeholder="Search for a city..." />
+            </form>
+            <button class="toggle" id="themeToggle">Toggle Theme</button>
+        </div>
+
+        <main id="app-body">
+            <div class="loader" id="loader"></div>
+
+            <div class="error" id="error" style="display: none;"></div>
+
+            <div class="weather" id="weather" style="display: none;">
+                <div class="card weather-main">
+                    <h2 id="cityName"></h2>
+                    <div class="current-temp">
+                        <img id="icon" alt="Weather icon"/>
+                        <h1 id="temp"></h1>
+                    </div>
+                    <h3 id="description"></h3>
+                    <div class="metrics">
+                        <div class="metric" id="feels"></div>
+                        <div class="metric" id="humidity"></div>
+                        <div class="metric" id="wind"></div>
+                        <div class="metric" id="sunrise"></div>
+                        <div class="metric" id="sunset"></div>
+                    </div>
+                </div>
+
+                <h3>5-Day Forecast</h3>
+                <div class="forecast" id="forecast"></div>
+            </div>
+        </main>
+    </div>
+     <script defer>
+        // --- IMPORTANT ---
+// In a real-world application, you would NOT expose your API key like this.
+// You would have a backend server (e.g., using Node.js/Express from your MERN stack)
+// that would make the request to the OpenWeatherMap API and then send the data
+// to your front-end. This protects your key from being stolen.
+const apiKey = "56bc161f08d7c12971025fc7d82dc687"; // Replace with your actual key for testing
+
+// --- DOM Elements ---
+const searchForm = document.getElementById("searchForm");
+const cityInput = document.getElementById("cityInput");
+const themeToggle = document.getElementById("themeToggle");
+const loader = document.getElementById("loader");
+const errorDisplay = document.getElementById("error");
+const weatherDisplay = document.getElementById("weather");
+const container = document.querySelector(".container");
+
+// --- UI Update Functions ---
+function updateCurrentWeather(data) {
+    document.getElementById("cityName").textContent = data.name;
+    document.getElementById("icon").src = `https://openweathermap.org/img/wn/${data.weather[0].icon}@4x.png`;
+    document.getElementById("description").textContent = data.weather[0].description;
+    document.getElementById("temp").textContent = `${Math.round(data.main.temp)}°C`;
+    document.getElementById("feels").textContent = `Feels like: ${Math.round(data.main.feels_like)}°C`;
+    document.getElementById("humidity").textContent = `Humidity: ${data.main.humidity}%`;
+    document.getElementById("wind").textContent = `Wind: ${data.wind.speed.toFixed(1)} km/h`;
+    document.getElementById("sunrise").textContent = `Sunrise: ${formatTime(data.sys.sunrise)}`;
+    document.getElementById("sunset").textContent = `Sunset: ${formatTime(data.sys.sunset)}`;
+}
+
+function updateForecast(data) {
+    const forecastContainer = document.getElementById("forecast");
+    forecastContainer.innerHTML = "";
+    const dailyData = groupByDay(data.list);
+
+    Object.entries(dailyData).slice(0, 5).forEach(([date, items]) => {
+        const dayName = new Date(date).toLocaleDateString("en-US", { weekday: 'short' });
+        const avgTemp = (items.reduce((sum, item) => sum + item.main.temp, 0) / items.length).toFixed(0);
+        const icon = items[0].weather[0].icon;
+        const pop = Math.round(items[0].pop * 100);
+
+        const forecastEl = document.createElement("div");
+        forecastEl.classList.add("forecast-day");
+        forecastEl.innerHTML = `
+            <h4>${dayName}</h4>
+            <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="Forecast icon"/>
+            <p>${avgTemp}°C</p>
+            <p>Rain: ${pop}%</p>
+        `;
+        forecastContainer.appendChild(forecastEl);
+    });
+}
+
+// --- UI State Management ---
+function showLoading() {
+    loader.style.display = "block";
+    weatherDisplay.style.display = "none";
+    errorDisplay.style.display = "none";
+}
+
+function showWeather() {
+    loader.style.display = "none";
+    weatherDisplay.style.display = "block";
+    errorDisplay.style.display = "none";
+}
+
+function showError(message) {
+    loader.style.display = "none";
+    weatherDisplay.style.display = "none";
+    errorDisplay.textContent = message;
+    errorDisplay.style.display = "block";
+}
+
+// --- Data Fetching ---
+async function fetchWeatherData(city) {
+    showLoading();
+    try {
+        const currentUrl = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${apiKey}`;
+        const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&appid=${apiKey}`;
+
+        const [currentRes, forecastRes] = await Promise.all([fetch(currentUrl), fetch(forecastUrl)]);
+
+        if (!currentRes.ok) {
+             if(currentRes.status === 404) throw new Error(`City not found: ${city}`);
+             throw new Error("Could not fetch weather data. Check API key or network.");
+        }
+         if (!forecastRes.ok) throw new Error("Could not fetch forecast data.");
+
+        const currentData = await currentRes.json();
+        const forecastData = await forecastRes.json();
+
+        updateCurrentWeather(currentData);
+        updateForecast(forecastData);
+        showWeather();
+
+    } catch (err) {
+        showError(err.message);
+    }
+}
+
+async function fetchWeatherByCoords(lat, lon) {
+    showLoading();
+     try {
+        const currentUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+        const forecastUrl = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
+
+        const [currentRes, forecastRes] = await Promise.all([fetch(currentUrl), fetch(forecastUrl)]);
+        if (!currentRes.ok || !forecastRes.ok) throw new Error("Could not fetch location-based weather.");
+
+        const currentData = await currentRes.json();
+        const forecastData = await forecastRes.json();
+
+        updateCurrentWeather(currentData);
+        updateForecast(forecastData);
+        showWeather();
+
+    } catch (err) {
+        showError(err.message);
+        // Fallback to a default city if geolocation fails
+        fetchWeatherData("Dubai");
+    }
+}
+
+// --- Helper Functions ---
+function formatTime(unixTimestamp) {
+    return new Date(unixTimestamp * 1000).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function groupByDay(forecastList) {
+    const daily = {};
+    forecastList.forEach(item => {
+        const date = item.dt_txt.split(" ")[0];
+        if (!daily[date]) {
+            daily[date] = [];
+        }
+        daily[date].push(item);
+    });
+    return daily;
+}
+
+// --- Event Listeners & Initialization ---
+function setupTheme() {
+    const savedTheme = localStorage.getItem("theme") || "light";
+    container.setAttribute("data-theme", savedTheme);
+    themeToggle.addEventListener("click", () => {
+        const currentTheme = container.getAttribute("data-theme");
+        const newTheme = currentTheme === "dark" ? "light" : "dark";
+        container.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+    });
+}
+
+function init() {
+    setupTheme();
+
+    searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const city = cityInput.value.trim();
+        if (city) {
+            fetchWeatherData(city);
+            cityInput.value = "";
+        }
+    });
+
+    // Get user's location on initial load
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                fetchWeatherByCoords(latitude, longitude);
+            },
+            (error) => {
+                console.error("Geolocation error:", error);
+                showError("Location access denied. Showing weather for Dubai.");
+                fetchWeatherData("Dubai"); // Default fallback city
+            }
+        );
+    } else {
+        showError("Geolocation is not supported. Please search for a city.");
+        fetchWeatherData("Dubai");
+    }
+}
+init();
+     </script>
+</body>
+</html>
